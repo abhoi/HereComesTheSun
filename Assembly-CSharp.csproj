@@ -50,10 +50,14 @@
      <Compile Include="Assets\Scripts\ButtonListControl.cs" />
      <Compile Include="Assets\Scripts\Circle.cs" />
      <Compile Include="Assets\Scripts\CollisionDetection.cs" />
-     <Compile Include="Assets\Scripts\HolderScript.cs" />
+     <Compile Include="Assets\Scripts\CoolerButton.cs" />
+     <Compile Include="Assets\Scripts\FarthestButton.cs" />
+     <Compile Include="Assets\Scripts\HotterButton.cs" />
+     <Compile Include="Assets\Scripts\NearestButton.cs" />
      <Compile Include="Assets\Scripts\Planets.cs" />
      <Compile Include="Assets\Scripts\controllermovement.cs" />
      <Compile Include="Assets\Scripts\rotate.cs" />
+     <Compile Include="Assets\Scripts\sliderControl.cs" />
      <Compile Include="Assets\SteamVR\Extras\SteamVR_GazeTracker.cs" />
      <Compile Include="Assets\SteamVR\Extras\SteamVR_LaserPointer.cs" />
      <Compile Include="Assets\SteamVR\Extras\SteamVR_Teleporter.cs" />

@@ -10,7 +10,7 @@ using System.Xml;
 
 using System;
 using System.IO;
-
+using UnityEngine.UI;
 
 public class Planets : MonoBehaviour {
 
@@ -103,10 +103,51 @@ public class Planets : MonoBehaviour {
 
 	// custom
 	public ButtonListControl buttonControl;
+	// public int numberOf3Dplanets = 0;
+	public List<string[]> starData = new List<string[]> ();
+	public List<List<string[]>> planetData = new List<List<string[]>> ();
+	public List<GameObject> current3dplanets = new List<GameObject> ();
+	public List<GameObject> current3dstars = new List<GameObject> ();
+	// public List<GameObject> current3dsystems = new List<GameObject> ();
+	// GameObject tempSystem = new GameObject();
+	public int numberOf3Dsystems = 0;
+
+	public List<System> farthestSystems = new List<System> ();
+	public List<System> nearestSystems = new List<System> ();
+	public List<string[]> nearestStarData = new List<string[]> ();
+	public List<List<string[]>> nearestPlanetData = new List<List<string[]>> ();
+	public List<System> coolerSystems = new List<System> ();
+	public List<System> hotterSystem = new List<System> ();
+
+	// custom2
+	// Speed and scale factor(multiplier)
+	private float speedFactor = 1;
+	private Vector3 scaleFactor = new Vector3 (1, 1, 1);
+
+	//Global list of created planets their stars and orbits as GameObjects.	
+	public List <GameObject> createdPlanets = new List<GameObject> ();	
+	public List <GameObject> createdStars = new List<GameObject> ();	
+	public List <GameObject> createdOrbits = new List<GameObject> ();	
+	public List <string[]> earthSizedPlanets = new List<string[]> ();	
+
+	//Get Set methods for speed and scale multipliers.
+	public void setSpeedFactor (float factor){		
+		this.speedFactor = factor;		
+	}		
+	public float getSpeedFactor (){		
+		return this.speedFactor;		
+	}		
+	public void setScaleFactor (Vector3 factor){		
+		this.scaleFactor = factor;		
+	}		
+	public Vector3 getScaleFactor (){		
+		return this.scaleFactor;		
+	}		
+
 
 	//------------------------------------------------------------------------------------//
 
-	void drawOrbit(string orbitName, float orbitRadius, Color orbitColor, float myWidth, GameObject myOrbits){
+	GameObject drawOrbit(string orbitName, float orbitRadius, Color orbitColor, float myWidth, GameObject myOrbits){
 
 		GameObject newOrbit;
 		GameObject orbits;
@@ -128,19 +169,24 @@ public class Planets : MonoBehaviour {
 
 		orbits = myOrbits;
 		newOrbit.transform.parent = orbits.transform;
-	
 
+		this.createdOrbits.Add (newOrbit);
+
+		return newOrbit;
 		}
 
 	//------------------------------------------------------------------------------------//
 
-	void dealWithPlanets (List<string []> planets, GameObject thesePlanets, GameObject theseOrbits){
+	public void dealWithPlanets (List<string []> planets, GameObject thesePlanets, GameObject theseOrbits){
 		GameObject newPlanetCenter;
 		GameObject newPlanet;
 
 		GameObject sunRelated;
 
 		Material planetMaterial;
+
+		// GameObject to hold temp
+		// GameObject temp = new GameObject();
 
 		int planetCounter;
 
@@ -164,16 +210,40 @@ public class Planets : MonoBehaviour {
 			newPlanet.transform.localScale = new Vector3 (planetSize, planetSize, planetSize);
 			newPlanet.transform.parent = newPlanetCenter.transform;
 
-			newPlanetCenter.GetComponent<rotate> ().rotateSpeed = planetSpeed; 
+			newPlanetCenter.GetComponent<rotate> ().rotateSpeed = this.speedFactor * planetSpeed; 
 
 			planetMaterial = new Material (Shader.Find ("Standard"));
 			newPlanet.GetComponent<MeshRenderer> ().material = planetMaterial;
 			planetMaterial.mainTexture = Resources.Load (textureName) as Texture;
 
-			drawOrbit (planetName + " orbit", planetDistance * orbitXScale, Color.yellow, orbitWidth, theseOrbits);
+			try {
+				createdPlanets.Add(newPlanetCenter);
+			} catch {
+				Debug.Log ("While while adding planets to list of Created Planets.");
+			}
+
+			GameObject LR1 = drawOrbit (planetName + " orbit", planetDistance * orbitXScale, Color.yellow, orbitWidth, theseOrbits);
+
+			GameObject temp = new GameObject ();
+			temp.AddComponent<rotate> ();
+			temp.GetComponent<rotate> ().rotateSpeed = planetSpeed;
+			newPlanetCenter.transform.parent = temp.transform;
+			newPlanet.transform.parent = temp.transform;
+			LR1.transform.parent = temp.transform;
+			// newPlanetCenter.GetComponent<rotate> ().rotateSpeed = planetSpeed;
+			// newPlanetCenter.GetComponent<rotate> ().transform.parent = temp.transform;
+			// Debug.Log ("Planet speed: " + newPlanetCenter.GetComponent<rotate>() + " " + planetSpeed);
+
+			current3dplanets.Add (temp);
+
+			// current3dplanets [numberOf3Dsystems].Add (tempSystem);
 
 			sunRelated = thesePlanets;
 			newPlanetCenter.transform.parent = sunRelated.transform;
+
+			/*newPlanetCenter.transform.parent = temp.transform;
+			newPlanet.transform.parent = temp.transform;
+			current3dplanets.Add (temp);*/
 		}
 	}
 
@@ -185,6 +255,12 @@ public class Planets : MonoBehaviour {
 		GameObject sunRelated;
 	
 		Material planetMaterial;
+
+		// custom
+		GameObject sidePlanetDiscoveryText;
+		GameObject sidePlanetNameText;
+		GameObject outOfScopeindication;
+		Material indicationMaterial;
 
 		int planetCounter;
 
@@ -203,15 +279,61 @@ public class Planets : MonoBehaviour {
 				newPlanet = GameObject.CreatePrimitive (PrimitiveType.Sphere);
 				newPlanet.name = planetName;
 				newPlanet.transform.position = new Vector3 (-0.5F * panelWidth + planetDistance * panelXScale, 0, 0);
-				newPlanet.transform.localScale = new Vector3 (planetSize, planetSize, 5.0F * panelDepth);
+
+				// custom
+				// Debug.Log ("Planet name: " + newPlanet.name + " x: " + newPlanet.transform.position.x);
+
+				if (planetSize <= 4.79)
+					newPlanet.transform.localScale = new Vector3 (planetSize, planetSize, 5.0F * panelDepth);
+				else
+					newPlanet.transform.localScale = new Vector3 (4.79f, 4.79f, 5.0F * panelDepth);
 
 				planetMaterial = new Material (Shader.Find ("Standard"));
 				newPlanet.GetComponent<MeshRenderer> ().material = planetMaterial;
 				planetMaterial.mainTexture = Resources.Load (textureName) as Texture;
 
+				// custom
+
+				sidePlanetDiscoveryText = new GameObject ();
+				sidePlanetDiscoveryText.name = "Side Planet Discovery ";
+				sidePlanetDiscoveryText.transform.position = new Vector3 (-0.5F * panelWidth + planetDistance * panelXScale, 0.3f, 0);
+				sidePlanetDiscoveryText.transform.localScale = new Vector3 (0.1F, 0.1F, 0.1F);
+				var sidePlanetMesh = sidePlanetDiscoveryText.AddComponent<TextMesh> ();
+				if (planets [planetCounter] [5] != null)
+					sidePlanetMesh.text = "Discovery method: " + planets [planetCounter] [5];
+				else
+					sidePlanetMesh.text = "Discovery method: Unknown";
+				sidePlanetMesh.fontSize = 50;
+				sidePlanetDiscoveryText.transform.parent = newPlanet.transform;
+
+
+				sidePlanetNameText = new GameObject ();
+				sidePlanetNameText.name = "Side Planet Name";
+				sidePlanetNameText.transform.position = new Vector3 (-0.5F * panelWidth + planetDistance * panelXScale, 0.8f, 0);
+
+				sidePlanetNameText.transform.localScale = new Vector3 (0.1F, 0.1F, 0.1F);
+				var sidePlanetMesh2 = sidePlanetNameText.AddComponent<TextMesh> ();
+				if (planets [planetCounter] [4] != null)
+					sidePlanetMesh2.text = "Planet Name: " + planets [planetCounter] [4];
+				else
+					sidePlanetMesh2.text = "Planet Name: Unknown";
+
+				sidePlanetMesh2.fontSize = 50;
+				sidePlanetNameText.transform.parent = newPlanet.transform;
+
 				sunRelated = thisSide;
 				newPlanet.transform.parent = sunRelated.transform;
 				newPlanet.transform.parent = newObj.transform;
+			} else {
+				outOfScopeindication = GameObject.CreatePrimitive (PrimitiveType.Cube);
+				outOfScopeindication.name = "Out of Scope Planet Indication";
+				outOfScopeindication.transform.position = new Vector3 (panelWidth - 10.0f, 0, 0);
+				outOfScopeindication.transform.localScale = new Vector3 (0.5F, 5F, 0.5F);
+
+				indicationMaterial = new Material (Shader.Find ("Standard"));
+				outOfScopeindication.GetComponent<MeshRenderer> ().material = indicationMaterial;
+				indicationMaterial.mainTexture = Resources.Load (textureName) as Texture;
+				outOfScopeindication.transform.parent = newObj.transform;
 			}
 		}
 		newObj.transform.parent = thisSide.transform;
@@ -224,6 +346,10 @@ public class Planets : MonoBehaviour {
 		GameObject newSidePanel;
 		GameObject newSideSun;
 		GameObject sideSunText;
+
+		// custom
+		GameObject sideSunDistanceText;
+		GameObject sideSunTypeText;
 
 		GameObject habZone;
 
@@ -244,7 +370,6 @@ public class Planets : MonoBehaviour {
 		sideSunMaterial = new Material (Shader.Find ("Unlit/Texture"));
 		newSideSun.GetComponent<MeshRenderer> ().material = sideSunMaterial;
 		sideSunMaterial.mainTexture = Resources.Load (star[2]) as Texture;
-
 
 		sideSunText = new GameObject();
 		sideSunText.name = "Side Star Name";
@@ -268,13 +393,40 @@ public class Planets : MonoBehaviour {
 		habZone.transform.parent = thisSide.transform;
 
 		// custom
+		sideSunDistanceText = new GameObject ();
+		sideSunDistanceText.name = "Side Star Distance";
+		sideSunDistanceText.transform.position = new Vector3 (-1.1F * panelWidth, 22.0F * panelHeight, 0);
+		sideSunDistanceText.transform.localScale = new Vector3 (0.1F, 0.1F, 0.1F);
+		var sunTextMesh2 = sideSunDistanceText.AddComponent<TextMesh>();
+		if (star [6] != null)
+			sunTextMesh2.text = star [6] + " lightyears";
+		else
+			sunTextMesh2.text = "Unknown lightyears";
+		sunTextMesh2.fontSize = 40;
+		sideSunDistanceText.transform.parent = thisSide.transform;
+
+		sideSunTypeText = new GameObject ();
+		sideSunTypeText.name = "Side Star Distance";
+		sideSunTypeText.transform.position = new Vector3 (-1.1F * panelWidth, 10.0F * panelHeight, 0);
+		// Debug.Log ("Panelwidth: " + panelWidth + " Panelheight: " + panelHeight);
+		sideSunTypeText.transform.localScale = new Vector3 (0.5F, 0.5F, 0.1F);
+		var sunTextMesh3 = sideSunTypeText.AddComponent<TextMesh>();
+		if (star [3] != null)
+			sunTextMesh3.text = star [3] + " stellar classification";
+		else
+			sunTextMesh3.text = "Unknown stellar classification";
+		sunTextMesh2.fontSize = 100;
+		sideSunTypeText.transform.parent = thisSide.transform;
+
+		// custom
 		GameObject newObj = new GameObject ();
 		newSidePanel.transform.parent = newObj.transform;
 		newSideSun.transform.parent = newObj.transform;
 		sideSunText.transform.parent = newObj.transform;
 		habZone.transform.parent = newObj.transform;
+		sideSunDistanceText.transform.parent = newObj.transform;
+		sideSunTypeText.transform.parent = newObj.transform;
 		newObj.transform.parent = thisSide.transform;
-		// fnewObj.transform.localScale = thisSide.transform.localScale;
 		newObj.transform.localPosition = Vector3.zero;
 
 		habMaterial = new Material (Shader.Find ("Standard"));
@@ -285,14 +437,19 @@ public class Planets : MonoBehaviour {
 
 	//------------------------------------------------------------------------------------//
 
-	void dealWithStar (string [] star, GameObject thisStar, GameObject theseOrbits){
+	public void dealWithStar (string [] star, GameObject thisStar, GameObject theseOrbits){
 
 		GameObject newSun, upperSun;
 		Material sunMaterial;
 
+		Light glowingLight;
+
 		GameObject sunRelated;
 		GameObject sunSupport;
 		GameObject sunText;
+
+		// GameObject to hold temp
+		// GameObject temp = new GameObject();
 
 		float sunScale = float.Parse(star [0]) / 100000F;
 		float centerSunSize = 0.25F;
@@ -310,7 +467,7 @@ public class Planets : MonoBehaviour {
 
 		sunRelated = thisStar;
 
-		newSun.GetComponent<rotate> ().rotateSpeed = 8F; 
+		newSun.GetComponent<rotate> ().rotateSpeed = 4F; 
 
 		sunMaterial = new Material (Shader.Find ("Unlit/Texture"));
 		newSun.GetComponent<MeshRenderer> ().material = sunMaterial;
@@ -325,7 +482,16 @@ public class Planets : MonoBehaviour {
 		upperSun.transform.localScale = new Vector3 (sunScale,sunScale,sunScale);
 		upperSun.transform.position = new Vector3 (0, 10, 0);
 
+		upperSun.AddComponent<Light> ();
+		glowingLight = upperSun.GetComponent<Light> ();
+		glowingLight.name = "starLight";
+		// glowingLight.color = Color;
+		glowingLight.intensity = 3;
+		glowingLight.transform.position = new Vector3 (0, 5, 0);
+
 		upperSun.transform.parent = sunRelated.transform;
+
+		this.createdStars.Add (upperSun);
 
 		// draw the support between them
 		sunSupport = GameObject.CreatePrimitive (PrimitiveType.Cube);
@@ -346,9 +512,41 @@ public class Planets : MonoBehaviour {
 
 		sunText.transform.parent = sunRelated.transform;
 
+		/*// custom
+		GameObject newObj = new GameObject ();
+		newSun.transform.parent = newObj.transform;
+		upperSun.transform.parent = newObj.transform;
+		sunSupport.transform.parent = newObj.transform;
+		sunText.transform.parent = newObj.transform;
+		newObj.transform.parent = sunRelated.transform;
 
-		drawOrbit ("Habitable Inner Ring", innerHab * orbitXScale, Color.green, habWidth, theseOrbits);
-		drawOrbit ("Habitable Outer Ring", outerHab * orbitXScale, Color.green, habWidth, theseOrbits);
+		if (numberOf3Dplanets == 0)
+			newObj.transform.localPosition = Vector3.zero;
+		else if (numberOf3Dplanets == 1)
+			newObj.transform.localPosition = new Vector3 (0, -70, 0);
+		else if (numberOf3Dplanets == 2)
+			newObj.transform.localPosition = new Vector3 (0, -140, 0);
+		else if (numberOf3Dplanets == 3)
+			newObj.transform.localPosition = new Vector3 (0, -210, 0);
+		else if (numberOf3Dplanets == 4)
+			newObj.transform.localPosition = new Vector3 (0, -280, 0);*/
+
+		GameObject LR1 = drawOrbit ("Habitable Inner Ring", innerHab * orbitXScale, Color.green, habWidth, theseOrbits);
+		GameObject LR2 = drawOrbit ("Habitable Outer Ring", outerHab * orbitXScale, Color.green, habWidth, theseOrbits);
+
+		GameObject temp = new GameObject ();
+		temp.AddComponent<rotate> ();
+		temp.GetComponent<rotate> ().rotateSpeed = newSun.GetComponent<rotate>().rotateSpeed;
+		newSun.transform.parent = temp.transform;
+		upperSun.transform.parent = temp.transform;
+		sunSupport.transform.parent = temp.transform;
+		sunText.transform.parent = temp.transform;
+		sunText.GetComponent<rotate> ().rotateSpeed = 0.0f;
+		LR1.transform.parent = temp.transform;
+		LR2.transform.parent = temp.transform;
+		glowingLight.transform.parent = temp.transform;
+		current3dstars.Add (temp);
+		// current3dsystems.Add (temp);
 	}
 
 	//------------------------------------------------------------------------------------//
@@ -483,6 +681,7 @@ public class Planets : MonoBehaviour {
 		SolarSide.transform.position += (offset * 0.15F);
 
 		GameObject temp = buttonControl.GenerateButton ();
+		temp.GetComponent<ButtonListButton> ().GetInfo (starInfo[systemId], systemId, unscaledPlanetInfo[systemId], offset, allThings);
 
 		sideDealWithStar (starInfo[systemId], temp, AllOrbits);
 		sideDealWithPlanets (unscaledPlanetInfo[systemId], temp, AllOrbits);
@@ -526,7 +725,6 @@ public class Planets : MonoBehaviour {
 
 		// need to do this last
 		SolarCenter.transform.position = offset;
-
 	}
 	
 
@@ -534,10 +732,6 @@ public class Planets : MonoBehaviour {
 
 
 	void Start () {
-
-		//Final containers for Star and planets.
-		List<string[]> starData = new List<string[]> ();
-		List<List<string[]>> planetData = new List<List<string[]>> ();
 
 //		string[] sol = new string[5] { "695500", "Our Sun", "sol", "G2V" , "1.0"};
 //
@@ -635,7 +829,7 @@ public class Planets : MonoBehaviour {
 					sTemp.radius = 1.0f;
 
 				// Add star spectral type
-				if (sTempNode.SelectSingleNode ("child::spectralType") != null)
+				if (sTempNode.SelectSingleNode ("child::spectraltype") != null)
 					sTemp.spectralType = sTempNode.SelectSingleNode ("child::spectraltype").InnerText;
 				else
 					sTemp.spectralType = null;
@@ -933,7 +1127,6 @@ public class Planets : MonoBehaviour {
 			
 		//Parsing/Generating Values for systems.
 		foreach (System s in systemList) {
-
 			if (s.star != null) {
 				/*
 				 * For all systems, maxTemperature = 11361K, minTemperature = 540K.
@@ -947,6 +1140,24 @@ public class Planets : MonoBehaviour {
 				 * 	range 7 : >9816
 				*/
 				//Fill temperature data holes.
+
+				// custom
+				/*using (StreamReader sr = new StreamReader("farthest.txt")) {
+					while (sr.Peek () >= 0) {
+						if (sr.ReadLine () == s.name) {
+							farthestSystems.Add (s);
+						}
+					}
+				}
+
+				using (StreamReader sr = new StreamReader ("nearest.txt")) {
+					while (sr.Peek () >= 0) {
+						if (sr.ReadLine () == s.name) {
+							nearestSystems.Add (s);
+						}
+					}
+				}*/
+
 				float temperature = 0.0F;
 				string texture = "sol"; //Deafult Teexture is our sun's.
 
@@ -971,8 +1182,7 @@ public class Planets : MonoBehaviour {
 					texture = "scale_7";
 
 				// Get string[] for current star.
-				string[] star = new string[6] { s.star.radius.ToString(), s.star.name, texture, s.star.spectralType, s.star.luminosity.ToString() , Convert.ToString(temperature)};
-
+				string[] star = new string[7] { s.star.radius.ToString(), s.star.name, texture, s.star.spectralType, s.star.luminosity.ToString() , Convert.ToString(temperature), (s.distance * 3.26156f).ToString()};
 
 				starData.Add (star);
 
@@ -980,12 +1190,35 @@ public class Planets : MonoBehaviour {
 
 				// Loop through planets in current system
 				foreach (Planet p in s.star.planets) {
+					// Fill temperature data holes
+
+					float radius = p.radius / 69911;
+					string planetTexture = "earthmap";
+
+					if (radius<=0.301)
+						planetTexture = "mercury";
+					else if (radius > 0.301 && radius <= 0.542)
+						planetTexture = "mars";
+					else if (radius > 0.542 && radius <= 0.783)
+						planetTexture = "venus";
+					else if (radius > 0.783 && radius <= 1.024)
+						planetTexture = "earthmap";
+					else if (radius > 1.024 && radius <= 1.265)
+						planetTexture = "neptune";
+					else if (radius > 1.265 && radius <= 1.506)
+						planetTexture = "uranus";
+					else if (radius > 1.506 && radius <=1.747)
+						planetTexture = "saturn";
+					else if (radius > 1.747)
+						planetTexture = "jupiter";
 
 					// Get string[] for current planet
-					string[] eachPlanet = new string[5] { p.distanceFromStar.ToString(), p.radius.ToString(), p.speed.ToString(), "earthmap", p.name };
-
+					string[] eachPlanet = new string[6] { p.distanceFromStar.ToString(), p.radius.ToString(), p.speed.ToString(), planetTexture, p.name, p.discoveryMethod };
 
 					thisStarPlanets.Add (eachPlanet);
+
+					if (float.Parse (eachPlanet [1]) > 0.783 && float.Parse (eachPlanet [1]) <= 1.024)
+						earthSizedPlanets.Add (eachPlanet);
 
 //					// Keep track of planet data
 //					planetCount++;
@@ -1006,16 +1239,12 @@ public class Planets : MonoBehaviour {
 					//						Console.WriteLine ("\t\t" + "Planet Distance From Star: " + p.distanceFromStar);
 					//						Console.WriteLine ("\t\t" + "Planet Speed: " + p.speed);
 				}
-
 				planetData.Add(thisStarPlanets);
-
-			} 
+			}
 			else {
 				Console.WriteLine ("Binary system or no star system");
 			}
-
 		}
-			
 			
 		GameObject allCenter = new GameObject();
 		allCenter.name = "all systems";
@@ -1034,13 +1263,20 @@ public class Planets : MonoBehaviour {
 		int systemPlanetCounter = 0;
 
 		foreach (var sys in starData){
-
 			systemOffset += oneOffset;
-			generate3dSystem (starData, systemPlanetCounter , planetData , systemOffset, allCenter);
+			// generate3dSystem (starData, systemPlanetCounter , planetData , systemOffset, allCenter);
+			generate2dSystem (starData, systemPlanetCounter, planetData, systemOffset, allCenter);
+			// Debug.Log ("Count: " + systemPlanetCounter + " + " + sys[1]);
+			systemPlanetCounter += 1;
+		}
+
+		/*foreach (System s in farthestSystems) {
+			systemOffset += oneOffset;
 			generate2dSystem (starData, systemPlanetCounter, planetData, systemOffset, allCenter);
 			systemPlanetCounter += 1;
+		}*/
 
-		}
+		Debug.Log (systemPlanetCounter);
 
 //		generate3dSystem (starData, 20 , planetData , systemOffset, allCenter);
 //		generate2dSystem (starData, 20, planetData, systemOffset, allCenter);

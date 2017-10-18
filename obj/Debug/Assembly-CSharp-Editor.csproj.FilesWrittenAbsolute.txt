@@ -36,3 +36,5 @@
 /Users/amlaanb/Desktop/Andy Solar System Test-2/Temp/bin/Debug/Mono.Cecil.Mdb.dll
 /Users/amlaanb/Desktop/Andy Solar System Test-2/Temp/bin/Debug/UnityEditor.iOS.Extensions.Xcode.dll
 /Users/amlaanb/Desktop/Andy Solar System Test-2/Temp/bin/Debug/UnityEditor.iOS.Extensions.Xcode.xml
+/Users/amlaanb/Desktop/Andy Solar System Test-2/Temp/bin/Debug/UnityEngine.Advertisements.dll
+/Users/amlaanb/Desktop/Andy Solar System Test-2/Temp/bin/Debug/UnityEngine.Purchasing.dll

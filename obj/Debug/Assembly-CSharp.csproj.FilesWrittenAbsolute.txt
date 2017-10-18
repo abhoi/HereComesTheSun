@@ -19,3 +19,5 @@
 /Users/amlaanb/Desktop/Andy Solar System Test-2/Temp/bin/Debug/Assembly-CSharp.dll
 /Users/amlaanb/Desktop/Andy Solar System Test-2/obj/Debug/Assembly-CSharp.dll
 /Users/amlaanb/Desktop/Andy Solar System Test-2/obj/Debug/Assembly-CSharp.dll.mdb
+/Users/amlaanb/Desktop/Andy Solar System Test-2/Temp/bin/Debug/UnityEngine.Advertisements.dll
+/Users/amlaanb/Desktop/Andy Solar System Test-2/Temp/bin/Debug/UnityEngine.Purchasing.dll

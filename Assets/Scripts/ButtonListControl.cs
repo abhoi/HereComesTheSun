@@ -43,16 +43,6 @@ public class ButtonListControl : MonoBehaviour {
 		button.transform.SetParent (buttonTemplate.transform.parent, false);
 		return button;
 	}
-
-	public GameObject GenerateHolder() {
-		GameObject holder = Instantiate (holderTemplate) as GameObject;
-		holder.SetActive (true);
-		// holder.GetComponent<SpriteRenderer> ().material.color = Color.green;
-		// holder.AddComponent<CanvasRenderer>();
-		holder.transform.SetParent (holderTemplate.transform.parent, false);
-		return holder;
-	}
-
 	public void ButtonClicked(string myTextString) {
 		Debug.Log (myTextString);
 	}
